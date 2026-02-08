@@ -47,6 +47,11 @@ import {
   handleSendChat as handleSendChatInternal,
   removeQueuedMessage as removeQueuedMessageInternal,
 } from "./app-chat.ts";
+import {
+  handleTeamAgentDraftChange as handleTeamAgentDraftChangeInternal,
+  handleTeamAgentSend as handleTeamAgentSendInternal,
+  loadTeamAgentHistory as loadTeamAgentHistoryInternal,
+} from "./app-team.ts";
 import { DEFAULT_CRON_FORM, DEFAULT_LOG_LEVEL_FILTERS } from "./app-defaults.ts";
 import { connectGateway as connectGatewayInternal } from "./app-gateway.ts";
 import {
@@ -217,6 +222,11 @@ export class OpenClawApp extends LitElement {
   @state() agentSkillsError: string | null = null;
   @state() agentSkillsReport: SkillStatusReport | null = null;
   @state() agentSkillsAgentId: string | null = null;
+
+  // Team dashboard state
+  @state() teamAgentDrafts: Record<string, string> = {};
+  @state() teamAgentMessages: Record<string, unknown[]> = {};
+  @state() teamAgentSending: Record<string, boolean> = {};
 
   @state() sessionsLoading = false;
   @state() sessionsResult: SessionsListResult | null = null;
@@ -392,6 +402,28 @@ export class OpenClawApp extends LitElement {
       this as unknown as Parameters<typeof handleSendChatInternal>[0],
       messageOverride,
       opts,
+    );
+  }
+
+  handleTeamAgentDraftChange(agentId: string, draft: string) {
+    handleTeamAgentDraftChangeInternal(
+      this as unknown as Parameters<typeof handleTeamAgentDraftChangeInternal>[0],
+      agentId,
+      draft,
+    );
+  }
+
+  async handleTeamAgentSend(agentId: string) {
+    await handleTeamAgentSendInternal(
+      this as unknown as Parameters<typeof handleTeamAgentSendInternal>[0],
+      agentId,
+    );
+  }
+
+  async loadTeamAgentHistory(agentId: string) {
+    await loadTeamAgentHistoryInternal(
+      this as unknown as Parameters<typeof loadTeamAgentHistoryInternal>[0],
+      agentId,
     );
   }
 

@@ -1,7 +1,7 @@
 import type { IconName } from "./icons.js";
 
 export const TAB_GROUPS = [
-  { label: "Chat", tabs: ["chat"] },
+  { label: "Chat", tabs: ["chat", "team"] },
   {
     label: "Control",
     tabs: ["overview", "channels", "instances", "sessions", "cron"],
@@ -20,6 +20,7 @@ export type Tab =
   | "skills"
   | "nodes"
   | "chat"
+  | "team"
   | "config"
   | "debug"
   | "logs";
@@ -34,6 +35,7 @@ const TAB_PATHS: Record<Tab, string> = {
   skills: "/skills",
   nodes: "/nodes",
   chat: "/chat",
+  team: "/team",
   config: "/config",
   debug: "/debug",
   logs: "/logs",
@@ -126,6 +128,8 @@ export function iconForTab(tab: Tab): IconName {
       return "folder";
     case "chat":
       return "messageSquare";
+    case "team":
+      return "users";
     case "overview":
       return "barChart";
     case "channels":
@@ -171,6 +175,8 @@ export function titleForTab(tab: Tab) {
       return "Nodes";
     case "chat":
       return "Chat";
+    case "team":
+      return "Team";
     case "config":
       return "Config";
     case "debug":
@@ -202,6 +208,8 @@ export function subtitleForTab(tab: Tab) {
       return "Paired devices, capabilities, and command exposure.";
     case "chat":
       return "Direct gateway chat session for quick interventions.";
+    case "team":
+      return "Chat with all agents at once and monitor active sessions.";
     case "config":
       return "Edit ~/.openclaw/openclaw.json safely.";
     case "debug":
