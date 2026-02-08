@@ -1,7 +1,7 @@
 import { html, nothing } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import type { AgentsListResult, SessionsListResult } from "../types.ts";
-import { formatAgo } from "../format.ts";
+import { formatRelativeTimestamp } from "../format.ts";
 
 export type TeamProps = {
   loading: boolean;
@@ -161,7 +161,7 @@ function renderAgentCard(agent: AgentsListResult["agents"][number], props: TeamP
                         <div class="team-session-key mono">${session.key}</div>
                         ${session.label ? html`<div class="team-session-label">${session.label}</div>` : nothing}
                         <div class="team-session-meta muted">
-                          Updated ${session.updatedAt ? formatAgo(session.updatedAt) : "n/a"}
+                          Updated ${session.updatedAt ? formatRelativeTimestamp(session.updatedAt) : "n/a"}
                         </div>
                       </div>
                     `,
