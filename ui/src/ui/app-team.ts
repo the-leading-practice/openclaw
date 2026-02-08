@@ -57,8 +57,8 @@ export async function handleTeamAgentSend(host: TeamChatHost, agentId: string) {
   };
 
   // Construct session key for this agent
-  // Format: agentId:sessionId or just agentId
-  const sessionKey = `${agentId}:team-chat`;
+  // Format: agent:agentId:sessionId
+  const sessionKey = `agent:${agentId}:team-chat`;
   const runId = generateUUID();
 
   try {
@@ -70,21 +70,28 @@ export async function handleTeamAgentSend(host: TeamChatHost, agentId: string) {
       idempotencyKey: runId,
     });
 
-    // Wait a moment for the response
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Poll for the response - agent may take time to respond
+    // Try a few times with increasing delays
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 1000 : 2000));
 
-    // Fetch the chat history for this agent to get the response
-    const res = await host.client.request<{ messages?: Array<unknown> }>("chat.history", {
-      sessionKey,
-      limit: 50,
-    });
+      const res = await host.client.request<{ messages?: Array<unknown> }>("chat.history", {
+        sessionKey,
+        limit: 50,
+      });
 
-    if (res.messages && Array.isArray(res.messages)) {
-      // Update messages with the full history
-      host.teamAgentMessages = {
-        ...host.teamAgentMessages,
-        [agentId]: res.messages,
-      };
+      if (res.messages && Array.isArray(res.messages)) {
+        host.teamAgentMessages = {
+          ...host.teamAgentMessages,
+          [agentId]: res.messages,
+        };
+        
+        // Check if we got a response (more messages than we sent)
+        const lastMsg = res.messages[res.messages.length - 1] as { role?: string } | undefined;
+        if (lastMsg?.role === "assistant") {
+          break; // Got response, stop polling
+        }
+      }
     }
   } catch (err) {
     console.error(`Error sending message to agent ${agentId}:`, err);
@@ -118,7 +125,7 @@ export async function loadTeamAgentHistory(
     return;
   }
 
-  const sessionKey = `${agentId}:team-chat`;
+  const sessionKey = `agent:${agentId}:team-chat`;
 
   try {
     const res = await host.client.request<{ messages?: Array<unknown> }>("chat.history", {
