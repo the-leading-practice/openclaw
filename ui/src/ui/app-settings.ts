@@ -235,6 +235,16 @@ export async function refreshActiveTab(host: SettingsHost) {
       !host.chatHasAutoScrolled,
     );
   }
+  if (host.tab === "team") {
+    const app = host as unknown as OpenClawApp;
+    await loadAgents(app);
+    await loadSessions(app);
+    // Load chat history for all agents
+    const agentIds = app.agentsList?.agents?.map((entry) => entry.id) ?? [];
+    for (const agentId of agentIds) {
+      void app.loadTeamAgentHistory(agentId);
+    }
+  }
   if (host.tab === "config") {
     await loadConfigSchema(host as unknown as OpenClawApp);
     await loadConfig(host as unknown as OpenClawApp);

@@ -65,6 +65,7 @@ const debouncedLoadUsage = (state: UsageState) => {
 import { renderAgents } from "./views/agents.ts";
 import { renderChannels } from "./views/channels.ts";
 import { renderChat } from "./views/chat.ts";
+import { renderTeam } from "./views/team.ts";
 import { renderConfig } from "./views/config.ts";
 import { renderCron } from "./views/cron.ts";
 import { renderDebug } from "./views/debug.ts";
@@ -1127,6 +1128,30 @@ export function renderApp(state: AppViewState) {
                 onSplitRatioChange: (ratio: number) => state.handleSplitRatioChange(ratio),
                 assistantName: state.assistantName,
                 assistantAvatar: state.assistantAvatar,
+              })
+            : nothing
+        }
+
+        ${
+          state.tab === "team"
+            ? renderTeam({
+                loading: state.agentsLoading,
+                error: state.agentsError,
+                agentsList: state.agentsList,
+                sessions: state.sessionsResult,
+                agentDrafts: (state as unknown as OpenClawApp).teamAgentDrafts,
+                agentMessages: (state as unknown as OpenClawApp).teamAgentMessages,
+                agentSending: (state as unknown as OpenClawApp).teamAgentSending,
+                onRefresh: () => {
+                  void loadAgents(state as { client: GatewayBrowserClient; agentsList: unknown; agentsLoading: boolean; agentsError: string | null });
+                  void loadSessions(state as { client: GatewayBrowserClient; sessionsResult: unknown; sessionsLoading: boolean; sessionsError: string | null }, { activeMinutes: "60", limit: "100" });
+                },
+                onAgentDraftChange: (agentId: string, draft: string) => {
+                  (state as unknown as OpenClawApp).handleTeamAgentDraftChange(agentId, draft);
+                },
+                onAgentSend: (agentId: string) => {
+                  void (state as unknown as OpenClawApp).handleTeamAgentSend(agentId);
+                },
               })
             : nothing
         }
