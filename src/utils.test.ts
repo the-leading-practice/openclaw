@@ -60,6 +60,10 @@ describe("sleep", () => {
 });
 
 describe("assertWebChannel", () => {
+  it("accepts valid channel", () => {
+    expect(() => assertWebChannel("web")).not.toThrow();
+  });
+
   it("throws for invalid channel", () => {
     expect(() => assertWebChannel("bad" as string)).toThrow();
   });
@@ -142,7 +146,7 @@ describe("resolveHomeDir", () => {
     vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
     vi.stubEnv("HOME", "/home/other");
 
-    expect(resolveHomeDir()).toBe("/srv/openclaw-home");
+    expect(resolveHomeDir()).toBe(path.resolve("/srv/openclaw-home"));
 
     vi.unstubAllEnvs();
   });
@@ -153,7 +157,7 @@ describe("shortenHomePath", () => {
     vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
     vi.stubEnv("HOME", "/home/other");
 
-    expect(shortenHomePath("/srv/openclaw-home/.openclaw/openclaw.json")).toBe(
+    expect(shortenHomePath(`${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`)).toBe(
       "$OPENCLAW_HOME/.openclaw/openclaw.json",
     );
 
@@ -166,9 +170,9 @@ describe("shortenHomeInString", () => {
     vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
     vi.stubEnv("HOME", "/home/other");
 
-    expect(shortenHomeInString("config: /srv/openclaw-home/.openclaw/openclaw.json")).toBe(
-      "config: $OPENCLAW_HOME/.openclaw/openclaw.json",
-    );
+    expect(
+      shortenHomeInString(`config: ${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`),
+    ).toBe("config: $OPENCLAW_HOME/.openclaw/openclaw.json");
 
     vi.unstubAllEnvs();
   });
